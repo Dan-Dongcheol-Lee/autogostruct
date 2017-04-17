@@ -1,0 +1,29 @@
+buildscript {
+    repositories {
+        maven { url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' }
+    }
+}
+
+plugins {
+    id "org.jetbrains.intellij" version "0.2.7"
+}
+
+apply plugin: 'java'
+apply plugin: 'org.jetbrains.intellij'
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.5'
+}
+
+intellij {
+    pluginName 'AutoGoStruct'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.8.8'
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+}
