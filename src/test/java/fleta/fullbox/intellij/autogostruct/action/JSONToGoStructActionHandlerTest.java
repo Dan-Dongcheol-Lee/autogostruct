@@ -2,9 +2,7 @@ package fleta.fullbox.intellij.autogostruct.action;
 
 import org.junit.Test;
 
-import java.util.Optional;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class JSONToGoStructActionHandlerTest {
 
@@ -15,6 +13,7 @@ public class JSONToGoStructActionHandlerTest {
         String json = "{\n" +
                 "\t\t\"denied\": false,\n" +
                 "\t\t\"deniedReason\": \"NO_CREDIT\",\n" +
+                "\t\t\"foo\": [1,2,3,4],\n" +
                 "\t\t\"held\": true,\n" +
                 "\t\t\"producedPaper\": true,\n" +
                 "\t\t\"archived\": false,\n" +
@@ -22,8 +21,19 @@ public class JSONToGoStructActionHandlerTest {
                 "\t\t\"conversionsApplied\": false\n" +
                 "\t}";
 
-        Optional<String> goStruct = handler.jsonToGoStruct(json);
-        assertEquals("", goStruct.orElse(""));
+        String actual = handler.jsonToGoStruct(json).orElse("");
+
+        String expect = "type AutoGoStruct struct {\n" +
+                "  Denied bool `json:\"denied\"`\n" +
+                "  DeniedReason string `json:\"deniedReason\"`\n" +
+                "  Foo []int `json:\"foo\"`\n" +
+                "  Held bool `json:\"held\"`\n" +
+                "  ProducedPaper bool `json:\"producedPaper\"`\n" +
+                "  Archived bool `json:\"archived\"`\n" +
+                "  Watermarked bool `json:\"watermarked\"`\n" +
+                "  ConversionsApplied bool `json:\"conversionsApplied\"`\n" +
+                "}";
+        assertEquals(expect, actual);
     }
 
     @Test
@@ -31,7 +41,7 @@ public class JSONToGoStructActionHandlerTest {
         String json = "{\n" +
                 "\t\t\"denied\": false,\n" +
                 "\t\t\"deniedReason\": \"NO_CREDIT\",\n" +
-                "\t\t\"foo\": [{\"bar\": \"barvalue1\"}, {\"bar\": \"barvalue2\"}],\n" +
+                "\t\t\"foo\": [{\"bar\": \"barvalue1\"}, {\"bar\": \"barvalue2\", \"boo\": \"boovalue1\"}],\n" +
                 "\t\t\"held\": true,\n" +
                 "\t\t\"producedPaper\": true,\n" +
                 "\t\t\"archived\": false,\n" +
@@ -39,8 +49,22 @@ public class JSONToGoStructActionHandlerTest {
                 "\t\t\"conversionsApplied\": false\n" +
                 "\t}";
 
-        Optional<String> goStruct = handler.jsonToGoStruct(json);
-        assertEquals("", goStruct.orElse(""));
+        String actual = handler.jsonToGoStruct(json).orElse("");
+        String expect = "type AutoGoStruct struct {\n" +
+                "  Denied bool `json:\"denied\"`\n" +
+                "  DeniedReason string `json:\"deniedReason\"`\n" +
+                "  Foo []struct {\n" +
+                "    Bar string `json:\"bar\"`\n" +
+                "    Boo string `json:\"boo\"`\n" +
+                "  } `json:\"foo\"`\n" +
+                "  Held bool `json:\"held\"`\n" +
+                "  ProducedPaper bool `json:\"producedPaper\"`\n" +
+                "  Archived bool `json:\"archived\"`\n" +
+                "  Watermarked bool `json:\"watermarked\"`\n" +
+                "  ConversionsApplied bool `json:\"conversionsApplied\"`\n" +
+                "}";
+
+        assertEquals(expect, actual);
     }
 
     @Test
@@ -116,12 +140,73 @@ public class JSONToGoStructActionHandlerTest {
                 "   }\n" +
                 "}";
 
-        Optional<String> goStruct = handler.jsonToGoStruct(json);
+        String actual = handler.jsonToGoStruct(json).orElse("");
 
-        assertNotNull(goStruct.get());
+        String expect = "type AutoGoStruct struct {\n" +
+                "  Time string `json:\"time\"`\n" +
+                "  JobId string `json:\"jobId\"`\n" +
+                "  Status struct {\n" +
+                "    Denied bool `json:\"denied\"`\n" +
+                "    DeniedReason string `json:\"deniedReason\"`\n" +
+                "    Held bool `json:\"held\"`\n" +
+                "    ProducedPaper bool `json:\"producedPaper\"`\n" +
+                "    Archived bool `json:\"archived\"`\n" +
+                "    Watermarked bool `json:\"watermarked\"`\n" +
+                "    ConversionsApplied bool `json:\"conversionsApplied\"`\n" +
+                "  } `json:\"status\"`\n" +
+                "  User struct {\n" +
+                "    Name string `json:\"name\"`\n" +
+                "    FullName string `json:\"fullName\"`\n" +
+                "    Emails []string `json:\"emails\"`\n" +
+                "    HomeDirectory string `json:\"homeDirectory\"`\n" +
+                "    Internal bool `json:\"internal\"`\n" +
+                "    Department string `json:\"department\"`\n" +
+                "    Office string `json:\"office\"`\n" +
+                "    GroupMembership []string `json:\"groupMembership\"`\n" +
+                "  } `json:\"user\"`\n" +
+                "  ChargedAccount struct {\n" +
+                "    Name string `json:\"name\"`\n" +
+                "    Personal bool `json:\"personal\"`\n" +
+                "    Cost float64 `json:\"cost\"`\n" +
+                "    OriginalCost float64 `json:\"originalCost\"`\n" +
+                "    Restricted bool `json:\"restricted\"`\n" +
+                "  } `json:\"chargedAccount\"`\n" +
+                "  PrintQueue struct {\n" +
+                "    Server string `json:\"server\"`\n" +
+                "    Name string `json:\"name\"`\n" +
+                "    Address string `json:\"address\"`\n" +
+                "  } `json:\"printQueue\"`\n" +
+                "  OriginalPrintQueue struct {\n" +
+                "    Server string `json:\"server\"`\n" +
+                "    Name string `json:\"name\"`\n" +
+                "    Address string `json:\"address\"`\n" +
+                "  } `json:\"originalPrintQueue\"`\n" +
+                "  Client struct {\n" +
+                "    NetworkAddress string `json:\"networkAddress\"`\n" +
+                "    Protocol string `json:\"protocol\"`\n" +
+                "  } `json:\"client\"`\n" +
+                "  Spool struct {\n" +
+                "    SizeKb int `json:\"sizeKb\"`\n" +
+                "    Pdl string `json:\"pdl\"`\n" +
+                "  } `json:\"spool\"`\n" +
+                "  Info struct {\n" +
+                "    DocumentName string `json:\"documentName\"`\n" +
+                "    Duplex bool `json:\"duplex\"`\n" +
+                "    Copies int `json:\"copies\"`\n" +
+                "    TotalPages int `json:\"totalPages\"`\n" +
+                "    TotalSheets int `json:\"totalSheets\"`\n" +
+                "    ColorPages int `json:\"colorPages\"`\n" +
+                "    ColorPagesEstimated bool `json:\"colorPagesEstimated\"`\n" +
+                "    Comment string `json:\"comment\"`\n" +
+                "    Invoiced bool `json:\"invoiced\"`\n" +
+                "    MediaSize struct {\n" +
+                "      HeightMM int `json:\"heightMM\"`\n" +
+                "      WidthMM int `json:\"widthMM\"`\n" +
+                "      Name string `json:\"name\"`\n" +
+                "    } `json:\"mediaSize\"`\n" +
+                "  } `json:\"info\"`\n" +
+                "}";
 
-        System.out.println(goStruct.get());
-
-        Thread.sleep(1000);
+        assertEquals(expect, actual);
     }
 }
