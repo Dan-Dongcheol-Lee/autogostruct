@@ -6,6 +6,7 @@ import com.intellij.codeInsight.CodeInsightActionHandler;
 import com.intellij.lang.ContextAwareActionHandler;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.VisualPosition;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +28,10 @@ public class JSONToGoStructActionHandler implements CodeInsightActionHandler, Co
         String selectedText = editor.getSelectionModel().getSelectedText();
 
         Optional<String> generated = jsonToGoStruct(selectedText);
-        System.out.println("generated: [" + generated.orElse("") + "]");
+
+        editor.getDocument().insertString(
+                editor.getSelectionModel().getSelectionEnd(),
+                "\n" + generated.orElse("") + "\n");
     }
 
     public Optional<String> jsonToGoStruct(String selectedText) {
@@ -41,7 +45,7 @@ public class JSONToGoStructActionHandler implements CodeInsightActionHandler, Co
             return Optional.of(startTraverse(jsonNode));
 
         } catch (IOException e) {
-            System.out.println(e);
+            e.printStackTrace();
             return Optional.empty();
         }
     }
